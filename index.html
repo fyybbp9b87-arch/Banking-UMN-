@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UMN Infinite Bank</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#101010;
+    color:white;
+}
+
+header{
+    background:#7b0000;
+    padding:20px;
+    text-align:center;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    background:#1c1c1c;
+    border:2px solid #0f8f3f;
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:20px;
+}
+
+input, select, button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+}
+
+input, select{
+    background:#2b2b2b;
+    color:white;
+}
+
+button{
+    background:#0f8f3f;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#14b84f;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th, td{
+    padding:12px;
+    border-bottom:1px solid #333;
+}
+
+th{
+    background:#222;
+}
+
+.balance{
+    background:#111;
+    padding:15px;
+    border-left:5px solid gold;
+    margin-top:15px;
+    font-size:20px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🏦 UNITED MELON NATIONS BANK</h1>
+<p>Infinite Crowns • Infinite Seeds • Saved Data</p>
+</header>
+
+<div class="container">
+
+<div class="card">
+
+<h2>Central Treasury</h2>
+
+<div class="balance">
+🌱 Total Seeds:
+<span id="seedCirculation">0</span>
+</div>
+
+<div class="balance">
+👑 Total Crowns:
+<span id="crownCirculation">0</span>
+</div>
+
+<h2>Mint Seeds</h2>
+
+<input type="number"
+id="mintSeedsAmount"
+placeholder="Amount of Seeds">
+
+<button onclick="mintSeeds()">
+Mint Seeds
+</button>
+
+<h2>Mint Crowns</h2>
+
+<input type="number"
+id="mintCrownsAmount"
+placeholder="Amount of Crowns">
+
+<button onclick="mintCrowns()">
+Mint Crowns
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>Create Citizen</h2>
+
+<input type="text"
+id="newCitizen"
+placeholder="Citizen Name">
+
+<button onclick="createCitizen()">
+Create Citizen
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>Transfer Seeds</h2>
+
+<select id="sender"></select>
+
+<select id="receiver"></select>
+
+<input type="number"
+id="transferAmount"
+placeholder="Seeds Amount">
+
+<button onclick="transferSeeds()">
+Send Seeds
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>Citizen Accounts</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>Citizen</th>
+<th>Seeds</th>
+<th>Crowns</th>
+</tr>
+</thead>
+
+<tbody id="citizenTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+let totalSeeds =
+Number(localStorage.getItem("totalSeeds"))
+|| 8000;
+
+let totalCrowns =
+Number(localStorage.getItem("totalCrowns"))
+|| 80;
+
+let citizens =
+JSON.parse(localStorage.getItem("citizens"))
+|| [
+
+{
+    name:"Elliot Davies",
+    seeds:5000,
+    crowns:50
+},
+
+{
+    name:"Keng Macsen",
+    seeds:3000,
+    crowns:30
+}
+
+];
+
+function saveData(){
+
+    localStorage.setItem(
+        "totalSeeds",
+        totalSeeds
+    );
+
+    localStorage.setItem(
+        "totalCrowns",
+        totalCrowns
+    );
+
+    localStorage.setItem(
+        "citizens",
+        JSON.stringify(citizens)
+    );
+}
+
+function renderCitizens(){
+
+    document.getElementById("seedCirculation")
+    .innerText =
+    totalSeeds.toLocaleString();
+
+    document.getElementById("crownCirculation")
+    .innerText =
+    totalCrowns.toLocaleString();
+
+    const table =
+    document.getElementById("citizenTable");
+
+    const sender =
+    document.getElementById("sender");
+
+    const receiver =
+    document.getElementById("receiver");
+
+    table.innerHTML = "";
+    sender.innerHTML = "";
+    receiver.innerHTML = "";
+
+    citizens.forEach((citizen,index)=>{
+
+        table.innerHTML += `
+        <tr>
+            <td>${citizen.name}</td>
+            <td>🌱 ${citizen.seeds.toLocaleString()}</td>
+            <td>👑 ${citizen.crowns.toLocaleString()}</td>
+        </tr>
+        `;
+
+        sender.innerHTML += `
+        <option value="${index}">
+            ${citizen.name}
+        </option>
+        `;
+
+        receiver.innerHTML += `
+        <option value="${index}">
+            ${citizen.name}
+        </option>
+        `;
+    });
+
+    saveData();
+}
+
+function mintSeeds(){
+
+    const amount = Number(
+        document.getElementById("mintSeedsAmount").value
+    );
+
+    if(amount <= 0){
+
+        alert("Enter valid amount.");
+        return;
+    }
+
+    totalSeeds += amount;
+
+    citizens[0].seeds += amount;
+
+    renderCitizens();
+
+    alert(
+        amount.toLocaleString() +
+        " Seeds minted."
+    );
+
+    document.getElementById("mintSeedsAmount")
+    .value = "";
+}
+
+function mintCrowns(){
+
+    const amount = Number(
+        document.getElementById("mintCrownsAmount").value
+    );
+
+    if(amount <= 0){
+
+        alert("Enter valid amount.");
+        return;
+    }
+
+    totalCrowns += amount;
+
+    citizens[0].crowns += amount;
+
+    renderCitizens();
+
+    alert(
+        amount.toLocaleString() +
+        " Crowns minted."
+    );
+
+    document.getElementById("mintCrownsAmount")
+    .value = "";
+}
+
+function createCitizen(){
+
+    const name =
+    document.getElementById("newCitizen")
+    .value.trim();
+
+    if(!name){
+
+        alert("Enter citizen name.");
+        return;
+    }
+
+    citizens.push({
+
+        name:name,
+        seeds:1000,
+        crowns:10
+    });
+
+    renderCitizens();
+
+    document.getElementById("newCitizen")
+    .value = "";
+}
+
+function transferSeeds(){
+
+    const senderIndex = Number(
+        document.getElementById("sender").value
+    );
+
+    const receiverIndex = Number(
+        document.getElementById("receiver").value
+    );
+
+    const amount = Number(
+        document.getElementById("transferAmount").value
+    );
+
+    if(senderIndex === receiverIndex){
+
+        alert("Choose different citizens.");
+        return;
+    }
+
+    if(amount <= 0){
+
+        alert("Enter valid amount.");
+        return;
+    }
+
+    if(citizens[senderIndex].seeds < amount){
+
+        alert("Not enough Seeds.");
+        return;
+    }
+
+    citizens[senderIndex].seeds -= amount;
+
+    citizens[receiverIndex].seeds += amount;
+
+    renderCitizens();
+
+    alert(
+        citizens[senderIndex].name +
+        " sent " +
+        amount.toLocaleString() +
+        " Seeds."
+    );
+
+    document.getElementById("transferAmount")
+    .value = "";
+}
+
+renderCitizens();
+
+</script>
+
+</body>
+</html>
